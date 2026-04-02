@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
-
+const requestRoutes= require("./Routes/requestRoutes.js");
 const app = express();
 
 app.use(helmet());
@@ -31,3 +31,4 @@ mongoose.connect(process.env.MONGO_URI)
         process.exit(1);
     });
 
+app.use("/api/requsets",requestRoutes);
