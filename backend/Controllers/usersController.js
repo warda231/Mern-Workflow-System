@@ -2,6 +2,7 @@ const User=require("../Models/Users.js");
 const bcrypt= require("bcryptjs");
 const jwt=require("jsonwebtoken");
 const cloudinary= require("../config/cloudinary.js");
+const { filter } = require("compression");
 
 
 const registerUser=async(req,res,next)=>{
@@ -42,11 +43,24 @@ const registerUser=async(req,res,next)=>{
 
   const getUsers=async (req,res,next)=>{
     try {
-        const users=await User.find().select("-password");
+        const page=parseInt(req.query.page) ||1;
+        const limit=parseInt(req.query.limit) || 5;
+        const search=req.query.search || "";
+
+        const skip=(page-1) * limit;
+
+        if(search)
+        {
+           filter.$or=[
+            {title:{$regex:search, $options:"i"}},
+            { description: { $regex: search, $options: "i" } },
+         ];
+        }
+        const users=await User.find().skip(skip).limit(limit).select("-password");
         res.json({
             success:true,
             data:users,
-            count:users.length()
+           
         });
 
     } catch (error) {

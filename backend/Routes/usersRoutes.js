@@ -10,8 +10,8 @@ const {
 }=require("../Controllers/usersController.js");
 
 router.post("/",registerUser);
-router.get("/:id",authMiddleware,getUsers);
-router.get("/",authMiddleware,roleMiddleware("admin"),getUserById);
+router.get("/",authMiddleware,getUsers);
+router.get("/:id",authMiddleware,roleMiddleware("admin"),getUserById);
 router.delete("/:id",authMiddleware,deleteUser);
 router.post("/uploadProfile/:id",authMiddleware,uploadProfileImage);
 

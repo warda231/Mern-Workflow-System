@@ -11,6 +11,7 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const requestRoutes= require("./Routes/requestRoutes.js");
 const userRoutes=require("./Routes/usersRoutes.js");
+const authRoutes=require("./Routes/authRoutes.js");
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB connected successfully'))
     .catch(err => {
@@ -38,6 +39,7 @@ app.use('/api', limiter);
 
 app.use("/api/requsets",requestRoutes);
 app.use("/api/Users/", userRoutes);
+app.use("/api/auth/",authRoutes);
 app.listen(3000, () => {
     console.log('server is running on port 3000 using express');
 });

@@ -37,9 +37,32 @@ const getMyRequests = async (req, res) => {
 
 const getAllRequests = async (req, res) => {
     try {
+        const page=parseInt(req.query.page) ||1;
+        const limit=parseInt(req.query.limit) || 5;
+        const search=req.query.search || "";
+        const status=req.query.status ||  "";
+
+        const skip=(page-1) * limit;
+
+        let filter = {};
+
+        if (status) {
+          filter.status = status;
+        }
+
+        if(search)
+        {
+            filter.$or=[
+              {title:{$regex:search, $options:"i"}},
+              { description: { $regex: search, $options: "i" } },
+
+            ];
+        }
+
+        
         const requests = await Request.find()
             .populate("createdBy", "email role")
-            .populate("approvedBy", "email role")
+            .populate("approvedBy", "email role").skip(skip).limit(limit)
             .sort({ createdAt: -1 });
 
         res.json({
