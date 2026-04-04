@@ -1,7 +1,7 @@
 const jwt= require("jsonwebtoken");
-const User=require("../Models/User.js");
+const User=require("../Models/Users.js");
 
-exports.authMiddleware= async (req,res,next)=>{
+const authMiddleware= async (req,res,next)=>{
     try {
         let token;
         if(
@@ -25,3 +25,5 @@ exports.authMiddleware= async (req,res,next)=>{
           });
     }
 }
+
+module.exports={authMiddleware};

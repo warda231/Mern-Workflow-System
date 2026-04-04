@@ -1,3 +1,7 @@
+const dns = require('node:dns');
+dns.setServers(['1.1.1.1', '8.8.8.8']); 
+require('dotenv').config();
+console.log("ENV CHECK:", process.env.MONGO_URI);
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -5,9 +9,15 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
 const requestRoutes= require("./Routes/requestRoutes.js");
-const app = express();
+const userRoutes=require("./Routes/usersRoutes.js");
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('✅ MongoDB connected successfully'))
+    .catch(err => {
+        console.error('❌ MongoDB connection error:', err);
+        process.exit(1);
+    });
+    const app = express();
 
 app.use(helmet());
 app.use(cors({
@@ -24,11 +34,10 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('✅ MongoDB connected successfully'))
-    .catch(err => {
-        console.error('❌ MongoDB connection error:', err);
-        process.exit(1);
-    });
+
 
 app.use("/api/requsets",requestRoutes);
+app.use("/api/Users/", userRoutes);
+app.listen(3000, () => {
+    console.log('server is running on port 3000 using express');
+});

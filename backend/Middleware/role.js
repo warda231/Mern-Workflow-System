@@ -1,4 +1,4 @@
-exports.roleMiddleware= async (...roles)=>{
+const roleMiddleware=  (...roles)=>{
     return (req,res,next)=>{
         if(!req.user){
             return res.status(401).json({
@@ -13,3 +13,5 @@ exports.roleMiddleware= async (...roles)=>{
         next();
     };
 };
+
+module.exports={roleMiddleware};
