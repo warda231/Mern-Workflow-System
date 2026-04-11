@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@types/express": "^5.0.6"
+  },
+  "dependencies": {
+    "express-validator": "^7.3.2"
   }
 }
