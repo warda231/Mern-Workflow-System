@@ -22,6 +22,12 @@ const token=jwt.sign(
 res.json({
     message:"Login Successfull!",
     token,
+    user:{
+        id:user._id,
+        name:user.name,
+        email:user.email,
+        role:user.role
+    },
 });
 
     } catch (error) {

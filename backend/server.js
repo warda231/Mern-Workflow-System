@@ -37,7 +37,7 @@ app.use('/api', limiter);
 
 
 
-app.use("/api/requsets",requestRoutes);
+app.use("/api/requests",requestRoutes);
 app.use("/api/Users/", userRoutes);
 app.use("/api/auth/",authRoutes);
 app.listen(3000, () => {

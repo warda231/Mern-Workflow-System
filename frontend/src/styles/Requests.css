@@ -1,0 +1,144 @@
+/* Requests.css - Styling for the My Requests page */
+
+.requests-page {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  .requests-page h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 24px;
+  }
+  
+  /* Table Styles */
+  .requests-table {
+    overflow-x: auto;
+  }
+  
+  .requests-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .requests-table th {
+    text-align: left;
+    padding: 16px 12px;
+    background: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .requests-table td {
+    padding: 16px 12px;
+    color: #6b7280;
+    font-size: 14px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .requests-table tr:hover {
+    background: #f9fafb;
+  }
+  
+  /* Status Badges */
+  .status-pending {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-approved {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #d1fae5;
+    color: #059669;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-rejected {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fee2e2;
+    color: #dc2626;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  /* Loading State */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  
+  .empty-state svg {
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  
+  .empty-state p {
+    color: #6b7280;
+    margin-bottom: 20px;
+  }
+  
+  .create-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  
+  .create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .requests-page {
+      padding: 16px;
+    }
+    
+    .requests-page h1 {
+      font-size: 20px;
+    }
+    
+    .requests-table th,
+    .requests-table td {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
+  }
