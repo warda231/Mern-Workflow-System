@@ -1,3 +1,4 @@
+const { request } = require("express");
 const Request = require("../Models/Request.js");
 
 const createRequest = async (req, res) => {
@@ -21,6 +22,53 @@ const createRequest = async (req, res) => {
 
 const getMyRequests = async (req, res) => {
     try {
+        const page=parseInt(req.query.page) || 1;
+        const limit=parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const search = req.query.search || "";
+        const status = req.query.status || "";                // Filter by status
+        const startDate = req.query.startDate || "";          // Filter by date range
+        const endDate = req.query.endDate || "";
+        const sortBy = req.query.sortBy || "createdAt";       // Sort field
+        const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
+
+        let query={
+            createdBy: req.user.id
+        };
+
+        if(status && status!=="all")
+        {
+            query.status=status;
+        }
+
+        if(search){
+query.$or=[
+    {title:{$regex:search,$options:"i"}},
+    { description: { $regex: search, $options: "i" } }
+];
+        }
+
+
+        if(startDate || endDate){
+            query.createdAt={};
+            if(startDate){
+                query.createdAt.$gte=new Date(startDate);
+            }
+            if(endDate){
+                query.createdAt.$lte= new Date(endDate);
+            }
+        }
+
+        const total= await Request.countDocuments(query);
+        const request= await Request.find(query).sort({[sortBy]:sortOrder}).skip(skip)
+        .limit(limit).populate("createdBy", "name email role")
+        .populate("approvedBy", "name email role");
+
+        const totalPages= Math.ceil(total/limit);
+        const hasNextPage= page<totalPages;
+        const hasPrevPage=page>1;
+
+    
         const requests = await Request.find({
             createdBy: req.user.id,
         }).sort({ createdAt: -1 });
@@ -29,10 +77,33 @@ const getMyRequests = async (req, res) => {
             success: true,
             count: requests.length,
             data: requests,
+        pagination:{
+            currentPage:page,
+            totalPages:totalPages,
+            totalItems: total,
+            itemsPerPage: limit,
+            hasNextPage: hasNextPage,
+            hasPrevPage: hasPrevPage,
+            nextPage: hasNextPage ? page + 1 : null,
+            prevPage: hasPrevPage ? page - 1 : null
+        },
+        filters:{
+            status:status || "all",
+            search:search || null,
+            dateRange:{
+                start:startDate || null,
+                end:endDate || null
+            }
+        }
         });
     } catch (error) {
+        console.error("Error in getMyRequests:", error);
+
         res.status(500).json({ message: error.message });
+    
+    
     }
+
 };
 
 const getAllRequests = async (req, res) => {
