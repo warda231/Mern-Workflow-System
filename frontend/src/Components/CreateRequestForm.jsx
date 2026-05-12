@@ -1,75 +1,109 @@
 import { useState } from "react";
 import API from "../api/axios";
 import toast from "react-hot-toast";
+import "../styles/CreateRequest.css";
 
-function CreateRequest(){
-    const [title,setTitle]=useState("");
-    const [description,setDescription]=useState("");
+function CreateRequest({ isOpen, onClose, onSuccess }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const [loading,setLoading]=useState(false);
-
-    const handleSubmit=async(e)=>{
-      e.preventDefault();
-      try {
-        setLoading(true);
-        await API.post("/requests",{
-            title,
-            description
-        });
-        toast.success("Request Created Successfully");
-        setTitle("");
-        setDescription("");
-      } catch (error) {
-        toast.error(
-            error.response?.data?.message || "Something went wrong"
-          );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-      }finally {
-        setLoading(false);
+    if (!title.trim() || !description.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await API.post("/requests", {
+        title: title.trim(),
+        description: description.trim(),
+      });
+      
+      toast.success("Request Created Successfully");
+      setTitle("");
+      setDescription("");
+      onClose(); // Close the modal
+      
+      if (onSuccess) {
+        onSuccess(); // Refresh the requests list
       }
-    };  
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleClose = () => {
+    setTitle("");
+    setDescription("");
+    onClose();
+  };
 
-    return (
+  if (!isOpen) return null;
 
-        <div className="p-6 max-w-xl">
-    
-          <h1 className="text-2xl font-bold mb-4">
-            Create Request
-          </h1>
-    
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-4"
-          >
-    
+  return (
+    <div className="modal-overlay" onClick={handleClose}>
+      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Create New Request</h2>
+          <button className="modal-close" onClick={handleClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-group">
+            <label htmlFor="title">Title *</label>
             <input
+              id="title"
               type="text"
-              placeholder="Title"
+              placeholder="Enter request title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border p-3 rounded"
+              className="form-input"
+              required
             />
-    
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Description *</label>
             <textarea
-              placeholder="Description"
+              id="description"
+              placeholder="Enter detailed description of your request"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full border p-3 rounded h-32"
+              className="form-textarea"
+              rows="5"
+              required
             />
-    
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              {loading ? "Creating..." : "Create Request"}
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" onClick={handleClose} className="btn-cancel">
+              Cancel
             </button>
-    
-          </form>
-    
-        </div>
-      );
+            <button type="submit" disabled={loading} className="btn-submit">
+              {loading ? (
+                <>
+                  <span className="spinner-small"></span>
+                  Creating...
+                </>
+              ) : (
+                "Create Request"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 export default CreateRequest;
