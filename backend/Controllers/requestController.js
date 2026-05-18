@@ -1,9 +1,43 @@
 const { request } = require("express");
 const Request = require("../Models/Request.js");
-
+const cloudinary=require("../config/cloudinary.js");
 const createRequest = async (req, res) => {
     try {
         const { title, description } = req.body;
+        let attachmenturl="";
+
+        if(req.file){
+            const uploadedFile=await cloudinary.uploader.upload_stream({
+                resource_type:"auto",
+                folder:"workflow-system",
+            },
+            async(error , result)=>{
+
+                if(error){
+                    return res.status(500).json({
+                        message: "File upload failed",
+                      });
+                }
+
+                attachmenturl=result.secure_url;
+
+                const request= await Request.create({
+                    title,
+                    description,
+                    attachment:attachmenturl,
+                    createdBy: req.user.id,
+
+                });
+                res.status(201).json({
+                    success: true,
+                    data: request,
+                  });
+
+            });
+
+            uploadedFile.end(req.file.buffer);
+        }
+        else{
         
         const request = await Request.create({
             title: title,
@@ -15,6 +49,7 @@ const createRequest = async (req, res) => {
             success: true,
             data: request
         });
+    }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
