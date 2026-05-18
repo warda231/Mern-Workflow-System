@@ -7,8 +7,8 @@ const { filter } = require("compression");
 
 const registerUser=async(req,res,next)=>{
     try {
-      const {name,email,password}=req.body;
-      if(!name || !email || !password)
+      const {name,email,password,role}=req.body;
+      if(!name || !email || !password || !role)
       {
           throw new Error("All the fields are required!");
       
@@ -24,7 +24,8 @@ const registerUser=async(req,res,next)=>{
       const user= await User.create({
           name:name,
           email:email,
-          password:hashedPassword
+          password:hashedPassword,
+          role:role
       });
 
       res.status(201).json({

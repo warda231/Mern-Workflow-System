@@ -539,3 +539,27 @@
   color: #9ca3af;
   font-size: 12px;
 }
+
+/* View All Link */
+.view-all-link {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.view-all-link a {
+  color: #6366f1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-all-link a:hover {
+  color: #4f46e5;
+  gap: 12px;
+}

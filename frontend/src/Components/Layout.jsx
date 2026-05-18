@@ -91,21 +91,8 @@ function Layout() {
             </svg>
             My Requests
           </a>
-          <a href="/new-request" className={`nav-item ${isActive("/new-request")}`}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 4.375V15.625M4.375 10H15.625" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            New Request
-          </a>
-          {user?.role === "admin" && (
-            <a href="/admin" className={`nav-item ${isActive("/admin")}`}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 12.5C12.0711 12.5 13.75 10.8211 13.75 8.75C13.75 6.67893 12.0711 5 10 5C7.92893 5 6.25 6.67893 6.25 8.75C6.25 10.8211 7.92893 12.5 10 12.5Z" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M15.5 17.5C15.5 15.5 13.5 13.5 10 13.5C6.5 13.5 4.5 15.5 4.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              Admin Panel
-            </a>
-          )}
+         
+        
         </nav>
 
         <div className="sidebar-footer">

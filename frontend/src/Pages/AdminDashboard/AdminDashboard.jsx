@@ -1,57 +1,47 @@
 import { useEffect, useState } from "react";
-import API from "../api/axios";
-import "../styles/Dashboard.css";
+import API from "../../api/axios";
+import "../../styles/AdminDashboard.css";
 
-function Dashboard() {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+function AdminDashboard() {
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
     approved: 0,
     rejected: 0,
   });
+  const [recentRequests, setRecentRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRequests();
+    fetchDashboardData();
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Get ALL requests for dashboard stats (no pagination needed)
-      const res = await API.get("/requests/me?limit=100");
-      let requestsData = res.data?.data || [];
-      setRequests(requestsData);
+      // Fetch stats and recent requests
+      const recentRes = await API.get("/requests/?limit=100");
       
-      // Calculate statistics
-      const total = requestsData.length;
-      const pending = requestsData.filter(r => r.status === "pending").length;
-      const approved = requestsData.filter(r => r.status === "approved").length;
-      const rejected = requestsData.filter(r => r.status === "rejected").length;
-      
-      setStats({ total, pending, approved, rejected });
+      setStats(statsRes.data);
+      setRecentRequests(recentRes.data?.data || []);
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Get recent 5 requests for display
-  const recentRequests = requests.slice(0, 5);
-
   if (loading) {
     return (
-      <div className="dashboard-loading">
+      <div className="admin-dashboard-loading">
         <div className="spinner"></div>
-        <p>Loading your dashboard...</p>
+        <p>Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-content">
+    <div className="admin-dashboard-content">
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card total">
@@ -61,7 +51,7 @@ function Dashboard() {
             </svg>
           </div>
           <div className="stat-info">
-            <h3>{stats.total}</h3>
+            <h3>{stats.total || 0}</h3>
             <p>Total Requests</p>
           </div>
         </div>
@@ -69,10 +59,11 @@ function Dashboard() {
           <div className="stat-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M12 8V12L14 14" stroke="currentColor" strokeWidth="1.5"/>
             </svg>
           </div>
           <div className="stat-info">
-            <h3>{stats.pending}</h3>
+            <h3>{stats.pending || 0}</h3>
             <p>Pending</p>
           </div>
         </div>
@@ -83,7 +74,7 @@ function Dashboard() {
             </svg>
           </div>
           <div className="stat-info">
-            <h3>{stats.approved}</h3>
+            <h3>{stats.approved || 0}</h3>
             <p>Approved</p>
           </div>
         </div>
@@ -94,29 +85,32 @@ function Dashboard() {
             </svg>
           </div>
           <div className="stat-info">
-            <h3>{stats.rejected}</h3>
+            <h3>{stats.rejected || 0}</h3>
             <p>Rejected</p>
           </div>
         </div>
       </div>
 
-      {/* Recent Requests */}
-      <div className="recent-requests">
-        <h2>Recent Requests</h2>
+      {/* Recent Requests Section */}
+      <div className="recent-requests-section">
+        <div className="section-header">
+          <h2>Recent Requests</h2>
+          <a href="/admin/requests" className="view-all-link">View All →</a>
+        </div>
         
         {recentRequests.length === 0 ? (
-          <div className="empty-state">
-            <p>No requests yet. Create your first request!</p>
-            <a href="/new-request" className="create-btn">Create Request</a>
+          <div className="empty-recent">
+            <p>No requests yet</p>
           </div>
         ) : (
-          <div className="requests-list">
+          <div className="recent-requests-list">
             {recentRequests.map(req => (
-              <div key={req._id} className="request-item">
-                <div>
+              <div key={req._id} className="recent-request-item">
+                <div className="request-info">
                   <h4>{req.title}</h4>
-                  <p>{req.description}</p>
-                  <small>Created: {new Date(req.createdAt).toLocaleDateString()}</small>
+                  <p className="request-meta">
+                    By {req.createdBy?.name} • {new Date(req.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
                 <span className={`status-badge status-${req.status}`}>
                   {req.status}
@@ -125,15 +119,9 @@ function Dashboard() {
             ))}
           </div>
         )}
-        
-        {requests.length > 5 && (
-          <div className="view-all-link">
-            <a href="/requests">View All Requests →</a>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-export default Dashboard;
+export default AdminDashboard;

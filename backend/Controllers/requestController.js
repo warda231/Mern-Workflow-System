@@ -22,88 +22,91 @@ const createRequest = async (req, res) => {
 
 const getMyRequests = async (req, res) => {
     try {
-        const page=parseInt(req.query.page) || 1;
-        const limit=parseInt(req.query.limit) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
         const search = req.query.search || "";
-        const status = req.query.status || "";                // Filter by status
-        const startDate = req.query.startDate || "";          // Filter by date range
+        const status = req.query.status || "";
+        const startDate = req.query.startDate || "";
         const endDate = req.query.endDate || "";
-        const sortBy = req.query.sortBy || "createdAt";       // Sort field
+        const sortBy = req.query.sortBy || "createdAt";
         const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
 
-        let query={
+        // Build query object
+        let query = {
             createdBy: req.user.id
         };
 
-        if(status && status!=="all")
-        {
-            query.status=status;
+        // Add status filter
+        if (status && status !== "all") {
+            query.status = status;
         }
 
-        if(search){
-query.$or=[
-    {title:{$regex:search,$options:"i"}},
-    { description: { $regex: search, $options: "i" } }
-];
+        // Add search filter
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } }
+            ];
         }
 
-
-        if(startDate || endDate){
-            query.createdAt={};
-            if(startDate){
-                query.createdAt.$gte=new Date(startDate);
+        // Add date range filter
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) {
+                query.createdAt.$gte = new Date(startDate);
             }
-            if(endDate){
-                query.createdAt.$lte= new Date(endDate);
+            if (endDate) {
+                query.createdAt.$lte = new Date(endDate);
             }
         }
 
-        const total= await Request.countDocuments(query);
-        const request= await Request.find(query).sort({[sortBy]:sortOrder}).skip(skip)
-        .limit(limit).populate("createdBy", "name email role")
-        .populate("approvedBy", "name email role");
+        // Get total count for pagination
+        const total = await Request.countDocuments(query);
 
-        const totalPages= Math.ceil(total/limit);
-        const hasNextPage= page<totalPages;
-        const hasPrevPage=page>1;
+        // ✅ Get filtered and paginated requests (THIS IS THE ONLY QUERY YOU NEED)
+        const requests = await Request.find(query)
+            .sort({ [sortBy]: sortOrder })
+            .skip(skip)
+            .limit(limit)
+            .populate("createdBy", "name email role")
+            .populate("approvedBy", "name email role");
 
-    
-        const requests = await Request.find({
-            createdBy: req.user.id,
-        }).sort({ createdAt: -1 });
+        // Calculate pagination metadata
+        const totalPages = Math.ceil(total / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
 
+        // ✅ Send back the filtered requests, not all requests
         res.json({
             success: true,
-            count: requests.length,
-            data: requests,
-        pagination:{
-            currentPage:page,
-            totalPages:totalPages,
-            totalItems: total,
-            itemsPerPage: limit,
-            hasNextPage: hasNextPage,
-            hasPrevPage: hasPrevPage,
-            nextPage: hasNextPage ? page + 1 : null,
-            prevPage: hasPrevPage ? page - 1 : null
-        },
-        filters:{
-            status:status || "all",
-            search:search || null,
-            dateRange:{
-                start:startDate || null,
-                end:endDate || null
+            data: requests,  // ← This is the filtered, paginated data
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalItems: total,
+                itemsPerPage: limit,
+                hasNextPage: hasNextPage,
+                hasPrevPage: hasPrevPage,
+                nextPage: hasNextPage ? page + 1 : null,
+                prevPage: hasPrevPage ? page - 1 : null
+            },
+            filters: {
+                status: status || "all",
+                search: search || null,
+                dateRange: {
+                    start: startDate || null,
+                    end: endDate || null
+                }
             }
-        }
         });
     } catch (error) {
         console.error("Error in getMyRequests:", error);
-
-        res.status(500).json({ message: error.message });
-    
-    
+        res.status(500).json({ 
+            success: false,
+            message: error.message 
+        });
     }
-
 };
 
 const getAllRequests = async (req, res) => {
@@ -114,7 +117,10 @@ const getAllRequests = async (req, res) => {
         const status=req.query.status ||  "";
 
         const skip=(page-1) * limit;
-
+        const startDate = req.query.startDate || "";
+        const endDate = req.query.endDate || "";
+        const sortBy = req.query.sortBy || "createdAt";
+        const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
         let filter = {};
 
         if (status) {
@@ -130,16 +136,47 @@ const getAllRequests = async (req, res) => {
             ];
         }
 
-        
-        const requests = await Request.find()
-            .populate("createdBy", "email role")
-            .populate("approvedBy", "email role").skip(skip).limit(limit)
-            .sort({ createdAt: -1 });
+        if (startDate || endDate) {
+            filter.createdAt = {};
+            if (startDate) {
+                filter.createdAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                filter.createdAt.$lte = new Date(endDate);
+            }
+        }
+        const total = await Request.countDocuments(filter);
 
+        const requests = await Request.find(filter)
+        .sort({ [sortBy]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .populate("createdBy", "name email role")
+        .populate("approvedBy", "name email role");
+        const totalPages = Math.ceil(total / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
         res.json({
             success: true,
-            count: requests.length,
-            data: requests,
+            data: requests,  // ← This is the filtered, paginated data
+            pagination: {
+                currentPage: page,
+                totalPages: totalPages,
+                totalItems: total,
+                itemsPerPage: limit,
+                hasNextPage: hasNextPage,
+                hasPrevPage: hasPrevPage,
+                nextPage: hasNextPage ? page + 1 : null,
+                prevPage: hasPrevPage ? page - 1 : null
+            },
+            filters: {
+                status: status || "all",
+                search: search || null,
+                dateRange: {
+                    start: startDate || null,
+                    end: endDate || null
+                }
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

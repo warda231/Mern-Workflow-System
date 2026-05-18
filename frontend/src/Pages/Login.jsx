@@ -9,7 +9,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
   const handleLogin = async () => {
     setError("");
     setLoading(true);
@@ -21,20 +20,29 @@ function Login() {
       });
 
       localStorage.setItem("token", res.data.token);
-      if(res.data.user)
-      {
+      if(res.data.user) {
         localStorage.setItem("user", JSON.stringify(res.data.user));
-
       }
 
-      navigate("/dashboard");
+      // ✅ Role-based redirection
+      const userRole = res.data.user.role?.toLowerCase();
+      console.log(`User role: ${userRole}`);
+      
+      if (userRole === "admin" || userRole === "manager") {
+        console.log("Redirecting to /admin/dashboard");
+        window.location.href = "/admin/dashboard";  // Use window.location to force full reload
+        // or use: navigate("/admin/dashboard", { replace: true });
+      } else {
+        console.log("Redirecting to /dashboard");
+        navigate("/dashboard");
+      }
+      
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleLogin();

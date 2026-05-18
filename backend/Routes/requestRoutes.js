@@ -30,7 +30,7 @@ router.post("/",authMiddleware,[
 
 ],validate,createRequest);
 router.get("/me",authMiddleware,getMyRequests);
-router.get("/",authMiddleware,roleMiddleware("admin"),getAllRequests);
+router.get("/",authMiddleware,roleMiddleware("admin","manager"),getAllRequests);
 router.put("/approve/:id",authMiddleware,roleMiddleware("manager"),approveRequest);
 router.put("/reject/:id", authMiddleware,roleMiddleware("manager"),rejectRequest);
 
